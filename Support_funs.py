@@ -7,6 +7,8 @@ The functions are:
     Backtracking_linesearch_inhomogeneous: Performs backtracking line search 
         for inhomogeneous kernel inference problems
     Get_P_psi: Calculates an S_psi that satisfies some boundary conditions
+    Simulatin_random_field: Draws a realization from a random field given
+        a tensor product decomposition of its covariance function.
 """
 
 
