@@ -3,7 +3,7 @@ Python code for kernel inference - optimal estimation of covariance functions.
 This repository provides basic functions, tutorials, figures related to estimation of covariance functions.
 
 Code and figures are meant as supplementaries the paper "Inference of instationary covariance functions for optimal estimation in 
-spatial statistics" by Jemil Butt, Andreas Wieser, and Josef Teichmann. The repository consists of three separate folders whose contents differ functionally. 
+spatial statistics" by Jemil Butt, Andreas Wieser, and Josef Teichmann. The repository consists of three separate folders whose contents offer different functionality. 
 
 The root folder contains the python functions necessary to execute kernel inference, the determination of a covariance function maximizing an objective function featuring losses derived from discrepancies to observed data and a prior regularization term. The file "KI.py" contains those maximization algorithms separated into two cases differing by their complexity, whereas the file "Support_funs.py" contains auxiliary numerical functions.
 
