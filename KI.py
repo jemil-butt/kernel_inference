@@ -453,6 +453,7 @@ def Kernel_inference_inhomogeneous(X_list, Lambda_p, Psi_list,r, G_list="none", 
     
     # i) Initialize iteration
     
+    # Step 1 Set up matrices
     gamma=copy.copy(Lambda_p)
     gamma_tilde_list=[gamma]
     eta_list=[]
@@ -466,11 +467,13 @@ def Kernel_inference_inhomogeneous(X_list, Lambda_p, Psi_list,r, G_list="none", 
         n_mu=0
         beta=0
     
+    # Step 2 Initialize options            
     Backtracking_options=(0.5,0.5,max_iter)
     tol_obj=10**(-8)
     
     KI_logfile={"Convergence": "Yes" , "Nr_iter" : [], "Norm_difference" : [], "Objective_function":[] }
     
+    # Step 3 set up lists
     for k in range(n_S_obs):
         gamma_tilde_list.append(Phi_Psi_list[k]@gamma@Phi_Psi_list[k].T)
         eta_list.append(gamma_tilde_list[k+1])
@@ -484,7 +487,7 @@ def Kernel_inference_inhomogeneous(X_list, Lambda_p, Psi_list,r, G_list="none", 
     step_counter=1
     while norm_diff_max>10**(-6) and step_counter < max_iter: 
         
-        if type(G_list[0])==np.ndarray:
+        if type(G_list[0])==np.ndarray:         # When nontrivial mean functions present
             
             # Step 1 Update beta
             B_beta=np.zeros([n_mu,n_mu])
@@ -529,7 +532,31 @@ def Kernel_inference_inhomogeneous(X_list, Lambda_p, Psi_list,r, G_list="none", 
                 return obj_val_1+obj_val_2+bar_val
             
             
-        else:
+        else:                                    # When nontrivial mean functions absent
+            # Step 1 Set up S_emp_list
+            S_emp_list=[]
+            S_phi_list=[]
+            for k in range(n_S_obs):
+                S_emp_list.append((1/(n_S_i[k]))*((X_list[k])@(X_list[k]).T))
+                S_phi_list.append(lina.pinv(Phi_list[k],rcond=tol)@S_emp_list[k]@lina.pinv(Phi_list[k].T,rcond=tol))      
+            
+            # Step 2 Set up objective function
+            def obj_fun(gamma_var,eta_list_var):
+                obj_val_1=0
+                for k in range(n_S_obs):
+                    temp_1=n_S_i[k]*(sf.Logpdet(eta_list_var[k],tol_obj)+np.trace(S_phi_list[k]@lina.pinv(eta_list_var[k],rcond=tol_obj,hermitian=True)))
+                    obj_val_1=obj_val_1+temp_1
+                obj_val_2=r*(-sf.Logpdet(gamma_var,tol_obj) + np.trace(Lambda_p_inv@gamma_var))
+            
+                Eigs=np.linalg.eigvalsh(gamma_var)
+                bar_val=10**(20)*(np.sum((Eigs<-tol_obj).astype(int)))
+                for k in range(n_S_obs):
+                    Eigs=np.linalg.eigvalsh(eta_list_var[k])
+                    temp_2=10**(10)*(np.sum((Eigs<-tol_obj).astype(int)))
+                    bar_val=bar_val+temp_2
+        
+                return obj_val_1+obj_val_2+bar_val
+            
             norm_diff_beta=0
         
         
